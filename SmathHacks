@@ -1,0 +1,40 @@
+calculateOptimalTilt[latitude_, season_] := 
+ Module[{tiltFactors, tiltAngle}, latitude = Abs[latitude];
+  tiltFactors = <|"summer" -> 23.5, "winter" -> -23.5, "spring" -> 0, 
+    "fall" -> 0|>;
+  If[season == "summer", tiltFactors["summer"] = 23.5, 
+   tiltFactors["winter"] = -23.5; tiltFactors["spring"] = 0; 
+   tiltFactors["fall"] = 0];
+  tiltAngle = latitude + tiltFactors[season];
+  tiltAngle]
+
+main[] := 
+ Module[{latitude, season, tiltAngle}, 
+  latitude = ToExpression@InputString["Enter latitude: "];
+  season = 
+   ToLowerCase@
+    InputString["Enter season (spring/summer/fall/winter): "];
+  tiltAngle = calculateOptimalTilt[latitude, season];
+  Print["Optimal tilt angle: ", tiltAngle];
+  (*Check if the tangent value is defined*)
+  If[Abs[Tan[tiltAngle Degree]] === Infinity, 
+   Print["The angle you entered results in an undefined tangent \
+value. Please enter a different angle."];
+   Abort[]];
+  (*Calculate the heights of the cylinders*)
+  height1 = 5 + Tan[tiltAngle Degree]*10;
+  height2 = 5 - Tan[tiltAngle Degree]*10;
+  (*Visualization*)
+  Graphics3D[{(*Cylinders representing hydraulic presses*){Gray, 
+     Cylinder[{{0, 0, 0}, {0, 0, height1}}, 0.2], 
+     Cylinder[{{10, 0, 0}, {10, 0, height2}}, 0.2], 
+     Cylinder[{{0, 5, 0}, {0, 5, height1}}, 0.2], 
+     Cylinder[{{10, 5, 0}, {10, 5, height2}}, 
+      0.2],(*Line connecting the cylinders*)
+     Line[{{0, 0, height1}, {10, 0, height2}, {10, 5, height2}, {0, 5,
+         height1}, {0, 0, height1}}]}, Boxed -> False, Axes -> True, 
+    AxesLabel -> {"X", "Y", "Z"}, 
+    PlotRange -> {{-1, 11}, {-1, 6}, {-1, 6}}, ImageSize -> Large}]
+  ]
+
+main[]
